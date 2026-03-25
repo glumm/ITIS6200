@@ -206,7 +206,7 @@ def run_menu():
         elif choice.isdigit() and int(choice) in cases:
             cases[int(choice)]()
         else:
-            print("Invalid input. Please enter a number 1-18, 'all', or 'quit'.")
+            print("Invalid input. Please enter a number 1-18, 'A', or 'Q'.")
 
 if __name__ == "__main__":
     run_menu()
