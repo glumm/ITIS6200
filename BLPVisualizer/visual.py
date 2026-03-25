@@ -46,9 +46,9 @@ def validate_levels(subj, obj):
 #       level, nor can they raise it above their maximum clearance.
 def set_level(subj, new_level):
     if(LEVELS[new_level] < LEVELS[subj.current_level]):
-        print("ERROR: cannot lower current operating level")
+        print(f"[STATUS] >> DENIED: cannot lower {subj.name}'s level from {subj.current_level} to {new_level}")      
     if(LEVELS[new_level] > LEVELS[subj.maximum]):
-        print("ERROR: connot raise level above maximum")
+        print("[STATUS] >> DENIED: cannot raise {subj.name}'s level above maximum of {subj.maximum}")
     else: 
         subj.current_level = new_level
     
@@ -62,15 +62,29 @@ def set_level(subj, new_level):
 def read(subj, obj):
     if LEVELS[obj.level] <= LEVELS[subj.maximum]:
         if LEVELS[obj.level] > LEVELS[subj.current_level]:
-            subj.current_level = obj.level  # raise level dynamically
-        print(f"{subj.name} reads {obj.filename}: GRANTED")
+            print(f"[STATUS] >> GRANTED: {subj.name} reads {obj.filename}")
+            print(f"[INFO] >> {subj.name}'s level raised: {subj.current_level} -> {obj.level}")
+            subj.current_level = obj.level
+        elif LEVELS[obj.level] == LEVELS[subj.current_level]:
+            print(f"[STATUS] >> GRANTED: {subj.name} reads {obj.filename}")
+        else:
+            print(f"[STATUS] >> DENIED: {subj.name} cannot read {obj.filename} (object level too low)")
     else:
-        print(f"{subj.name} reads {obj.filename}: DENIED")
+        print(f"[STATUS] >> DENIED: {subj.name} cannot read {obj.filename} (exceeds max clearance)")
 
 #Evaluates a write request.
 #   -Constraint: Must enforce the No Write Down property.
 def write(subj, obj):
     if LEVELS[subj.current_level] <= LEVELS[obj.level]:
-        print(f"{subj.name} writes to {obj.filename}: GRANTED")
+        print(f"[STATUS] >> GRANTED: {subj.name} writes to {obj.filename}")
     else:
-        print(f"{subj.name} writes to {obj.filename}: DENIED")
+        print(f"[STATUS] >> DENIED: {subj.name} cannot write to {obj.filename}")
+
+#Displays current state 
+def disp_state():
+    print("\n--------Current BLP State --------")
+    for s in subjects: 
+        print(f"[Subject] {s.name}: Curr = {s.current_level}, Max = {s.maximum}")
+    for o in objects:
+        print(f"[Object] {o.filename}: Level = {o.level}")
+
