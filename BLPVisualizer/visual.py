@@ -47,8 +47,8 @@ def validate_levels(subj, obj):
 def set_level(subj, new_level):
     if(LEVELS[new_level] < LEVELS[subj.current_level]):
         print(f"[STATUS] >> DENIED: cannot lower {subj.name}'s level from {subj.current_level} to {new_level}")      
-    if(LEVELS[new_level] > LEVELS[subj.maximum]):
-        print("[STATUS] >> DENIED: cannot raise {subj.name}'s level above maximum of {subj.maximum}")
+    elif(LEVELS[new_level] > LEVELS[subj.maximum]):
+        print(f"[STATUS] >> DENIED: cannot raise {subj.name}'s level above maximum of {subj.maximum}")
     else: 
         subj.current_level = new_level
     
