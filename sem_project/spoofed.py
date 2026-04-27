@@ -10,7 +10,7 @@ def get_local_ip(target_ip):
     finally:
         s.close()
 
-# Only thing you need to change
+# Variable IP will change depending on the network - change accordingly 
 PI_IP = "172.20.9.55"
 
 # Everything else is automatic
